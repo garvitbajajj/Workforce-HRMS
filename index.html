@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WorkForce HRMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --font: 'DM Sans', system-ui, sans-serif;
+      --mono: 'DM Mono', monospace;
+      --bg: #f4f5f7;
+      --surface: #ffffff;
+      --surface2: #f8f9fb;
+      --border: #e2e5ea;
+      --border2: #d0d4db;
+      --text: #111827;
+      --text2: #4b5563;
+      --text3: #9ca3af;
+      --primary: #1a56db;
+      --primary-light: #ebf0fd;
+      --primary-dark: #1446c0;
+      --success: #05966b;
+      --success-light: #edfaf5;
+      --warning: #d97706;
+      --warning-light: #fffbeb;
+      --danger: #e02424;
+      --danger-light: #fef2f2;
+      --purple: #7c3aed;
+      --purple-light: #f5f3ff;
+      --radius: 10px;
+      --radius-sm: 6px;
+      --radius-lg: 14px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
+      --sidebar-w: 260px;
+      --topbar-h: 60px;
+    }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    #root { display: flex; min-height: 100vh; }
+    button { font-family: var(--font); cursor: pointer; }
+    input, select, textarea { font-family: var(--font); }
+    a { color: inherit; text-decoration: none; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    /* CSS Animations & Transitions */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes modalScale {
+      from { opacity: 0; transform: scale(0.96) translateY(12px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.25s ease-out forwards;
+    }
+    .slide-up {
+      animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .modal-content-animated {
+      animation: modalScale 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .hover-card {
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hover-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 16px -6px rgba(0, 0, 0, 0.05);
+      border-color: rgba(26, 86, 219, 0.25);
+    }
+
+    button, .btn {
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    button:active, .btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Sidebar dots in topbar */
+    .sidebar-dots {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 8px 4px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+    .sidebar-dots:hover {
+      background: var(--surface2);
+    }
+    .sidebar-dots:hover .dot {
+      background: var(--primary);
+    }
+    .sidebar-dots .dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--text3);
+      transition: all 0.2s ease;
+    }
+
+    .sidebar-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: var(--sidebar-w);
+      z-index: 100;
+      transform: translateX(-100%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+
+    .sidebar-wrapper.open {
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    .sidebar-wrapper aside {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: #0f172a;
+      box-shadow: 4px 0 30px rgba(0,0,0,0.35);
+      pointer-events: auto;
+    }
+
+    /* Overlay to close sidebar on click outside */
+    .sidebar-overlay {
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      z-index: 99;
+    }
+
+    /* Responsive Navigation & Grid Layouts */
+    .mobile-menu-btn {
+      display: none !important;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px;
+      color: var(--text2);
+    }
+
+    .main-content-wrapper {
+      flex: 1;
+      margin-left: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: margin-left 0.25s ease;
+    }
+
+    .main-container {
+      flex: 1;
+      padding: 28px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Clock buttons in sidebar */
+    .sidebar-clock-btns {
+      display: flex;
+      gap: 8px;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .sidebar-clock-btns button {
+      flex: 1;
+      padding: 10px 0;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 0.2px;
+    }
+    .sidebar-clock-btns button:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+    .sidebar-clock-btns button:active {
+      transform: scale(0.97);
+    }
+    .btn-clock-in {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      box-shadow: 0 2px 8px rgba(34,197,94,0.35);
+    }
+    .btn-clock-out {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      box-shadow: 0 2px 8px rgba(239,68,68,0.35);
+    }
+    .btn-clock-done {
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.5);
+      cursor: default !important;
+    }
+    .btn-clock-done:hover {
+      filter: none !important;
+      transform: none !important;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .attendance-calendar-grid {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .reports-charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      .charts-grid, .attendance-calendar-grid, .reports-charts-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: block !important;
+      }
+      .main-content-wrapper {
+        margin-left: 0 !important;
+      }
+      .main-container {
+        padding: 16px !important;
+      }
+      .sidebar-dots {
+        display: none;
+      }
+      .sidebar-overlay {
+        background: rgba(0,0,0,0.5);
+      }
+      .sidebar-wrapper {
+        transform: translateX(-100%);
+      }
+      .sidebar-wrapper.open {
+        transform: translateX(0);
+        pointer-events: auto;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .topbar-date {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .toggle-text-label {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>
